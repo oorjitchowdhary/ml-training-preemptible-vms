@@ -69,5 +69,44 @@ def main():
     # Save the trained model
     torch.save(net.state_dict(), 'model.pth')
 
+    # Test the network on the test data
+    dataiter = iter(testloader)
+    images, labels = next(dataiter)
+
+    # print images
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    def imshow(img):
+        img = img / 2 + 0.5
+        npimg = img.numpy()
+        plt.imshow(np.transpose(npimg, (1, 2, 0)))
+        plt.show()
+
+    imshow(torchvision.utils.make_grid(images))
+    print('GroundTruth: ', ' '.join(f'{classes[labels[j]]:5s}' for j in range(batch_size)))
+
+    net = Net()
+    net.load_state_dict(torch.load('model.pth'))
+
+    outputs = net(images)
+    _, predicted = torch.max(outputs, 1)
+
+    print('Predicted: ', ' '.join(f'{classes[predicted[j]]:5s}' for j in range(batch_size)))
+
+    # Test the network on the whole dataset
+    correct = 0
+    total = 0
+
+    with torch.no_grad():
+        for data in testloader:
+            images, labels = data
+            outputs = net(images)
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+
+    print(f'Accuracy of the network on the 10000 test images: {100 * correct / total}%')
+
 if __name__ == '__main__':
     main()
