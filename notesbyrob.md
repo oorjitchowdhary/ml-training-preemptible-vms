@@ -9,3 +9,7 @@ Plan
     * Find a tougher job eg from kaggle
 * See what can be done about benchmarking it
 * Go again on a bigger machine
+
+<BR><BR><BR>
+
+$e^x$
