@@ -31,4 +31,7 @@ python3 -m pip install -r requirements.txt
 
 
 
-Last command fails ERROR could not resolve some package; contourpy maybe.
+| Tables        | Are           | Just So  |
+| ------------- |:-------------:| -----:|
+| col 3 is      | right-aligned | \$1600 |
+| col 2 is      | centered      |   \$12 |
