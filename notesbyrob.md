@@ -31,7 +31,7 @@ python3 -m pip install -r requirements.txt
 
 
 
-| Tables        | Are           | Just So  |
-| ------------- |:-------------:| -----:|
-| col 3 is      | right-aligned | \$1600 |
-| col 2 is      | centered      |   \$12 |
+| Instance        | Rate           | Time (sec)  |  Accuracy | Epochs | Learning Rate | Momentum
+| ------------- |:-------------:| -----:| -----:| -----:| -----:| -----:|
+| Az B2ms      | \$61 | 580 | 61.0  | 10   | .001   | 0.9 |
+| Az B20ms      | \$607 | 760 | 62.8   | 10   | .001   | 0.9 |
