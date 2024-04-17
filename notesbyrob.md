@@ -31,7 +31,8 @@ python3 -m pip install -r requirements.txt
 
 
 
-| Instance        | Rate           | Time (sec)  |  Accuracy | Epochs | Learning Rate | Momentum
+| Instance        | Rate | Sec  |  Cost | Epochs | Learning Rate | Momentum
 | ------------- |:-------------:| -----:| -----:| -----:| -----:| -----:|
-| Az B2ms      | \$61 | 580 | 61.0  | 10   | .001   | 0.9 |
-| Az B20ms      | \$607 | 760 | 62.8   | 10   | .001   | 0.9 |
+| Az B2ms      | .085 | 580 | .014  | 10 | .001  | 0.9 |
+| Az D4s v3    | .194 | 452 | .024  | 10 | 0.001 | 0.9 |
+| Az B20ms     | .843 | 760 | .178  | 10 | .001  | 0.9 |
