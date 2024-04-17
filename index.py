@@ -1,8 +1,11 @@
 import torch
 import torchvision
 import torchvision.transforms as transforms
+from time import time
 
 def main():
+    tock = time()
+    
     transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
     batch_size = 4
@@ -107,6 +110,10 @@ def main():
             correct += (predicted == labels).sum().item()
 
     print(f'Accuracy of the network on the 10000 test images: {100 * correct / total}%')
+
+    tick = time()
+    print("Elapsed time (seconds):")
+    print(tick - tock)
 
 if __name__ == '__main__':
     main()
