@@ -1,11 +1,18 @@
 import torch
 import torchvision
 import torchvision.transforms as transforms
-from time import time
+from google.cloud import storage
+
+bucket_name = 'cifar-pytorch-checkpoints'
+storage_client = storage.Client().from_service_account_json('robs-project-382021-29095b54cf4c.json')
+
+def save_checkpoint_to_gcp(checkpoint, filename):
+    bucket = storage_client.bucket(bucket_name)
+
+    blob = bucket.blob(filename)
+    blob.upload_from_string(checkpoint)
 
 def main():
-    tock = time()
-    
     transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
     batch_size = 4
@@ -62,6 +69,15 @@ def main():
             loss.backward()
             optimizer.step()
 
+            checkpoint = {
+                'epoch': epoch,
+                'model_state_dict': net.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': loss
+            }
+            torch.save(checkpoint, f'./checkpoints/checkpoint_{epoch}.pth')
+            # save_checkpoint_to_gcp(f'./checkpoints/checkpoint_{epoch}.pth', f'checkpoint_{epoch}.pth')
+
             running_loss += loss.item()
             if i % 2000 == 1999:
                 print(f'[{epoch + 1}, {i + 1}] loss: {running_loss / 2000}')
@@ -70,7 +86,8 @@ def main():
     print('Finished Training')
 
     # Save the trained model
-    torch.save(net.state_dict(), 'model.pth')
+    torch.save(net.state_dict(), 'final_model.pth')
+    save_checkpoint_to_gcp('final_model.pth', 'final_model.pth')
 
     # Test the network on the test data
     dataiter = iter(testloader)
@@ -90,7 +107,7 @@ def main():
     print('GroundTruth: ', ' '.join(f'{classes[labels[j]]:5s}' for j in range(batch_size)))
 
     net = Net()
-    net.load_state_dict(torch.load('model.pth'))
+    net.load_state_dict(torch.load('final_model.pth'))
 
     outputs = net(images)
     _, predicted = torch.max(outputs, 1)
@@ -110,10 +127,6 @@ def main():
             correct += (predicted == labels).sum().item()
 
     print(f'Accuracy of the network on the 10000 test images: {100 * correct / total}%')
-
-    tick = time()
-    print("Elapsed time (seconds):")
-    print(tick - tock)
 
 if __name__ == '__main__':
     main()
