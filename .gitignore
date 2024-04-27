@@ -1,4 +1,5 @@
 data/
 venv/
-model.pth
+checkpoints/
+__pycache__/
 *.json
