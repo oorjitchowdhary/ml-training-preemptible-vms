@@ -8,7 +8,6 @@ resources:
 # Its contents are synced to ~/sky_workdir/ on the cluster.
 workdir: .
 
-# TODO: evaluate without checkpointing first
 # file_mounts:
 #   /checkpoint:
 #     source: gs://cifar-skypilot-bucket
@@ -18,12 +17,11 @@ workdir: .
 # Invoked under the workdir (i.e., can use its files).
 setup: |
   echo "Running SkyPilot setup script."
-  pip install torch torchvision matplotlib numpy scipy
+  pip install -r requirements.txt
   echo "Finished SkyPilot setup script."
 
 # Typical use: make use of resources, such as running training.
 # Invoked under the workdir (i.e., can use its files).
 run: |
   echo "Hello, SkyPilot!"
-  conda env list
   python index.py
