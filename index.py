@@ -1,9 +1,27 @@
+import os
 import torch
 import torchvision
 import torchvision.transforms as transforms
 
-from checkpointing import save_checkpoint_to_gcp, load_checkpoint_from_gcp
+from checkpointing import save_checkpoint_to_gcp, load_checkpoint_from_gcp, checkpoint_exists
 from model import Net
+
+def resume_from_checkpoint():
+    # Find the latest checkpoint
+    epoch, latest_checkpoint = 0, None
+    for i in range(9, -1, -1):
+        if checkpoint_exists(f'checkpoint_{i}.pth'):
+            latest_checkpoint = f'checkpoint_{i}.pth'
+            epoch = i
+            break
+    
+    if latest_checkpoint is None:
+        print('No checkpoints found')
+        return 0, None
+    
+    # Load the latest checkpoint
+    load_checkpoint_from_gcp(latest_checkpoint)
+    return epoch + 1, latest_checkpoint
 
 def train():
     # Define image transformations
@@ -32,7 +50,8 @@ def train():
     optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
     # Train the network
-    for epoch in range(10): # loop over the dataset multiple times
+    start_epoch, latest_checkpoint = resume_from_checkpoint()
+    for epoch in range(start_epoch, 10):
         running_loss = 0.0
         for i, data in enumerate(trainloader, 0):
             inputs, labels = data
@@ -53,15 +72,16 @@ def train():
 
             running_loss += loss.item()
             if i % 2000 == 1999:
-                print(f'[{epoch + 1}, {i + 1}] loss: {running_loss / 2000}')
+                print(f'[{epoch}, {i + 1}] loss: {running_loss / 2000}')
                 running_loss = 0.0
 
         # Save the checkpoint at the end of each epoch
+        os.makedirs('./checkpoints', exist_ok=True)
         torch.save(checkpoint, f'./checkpoints/checkpoint_{epoch}.pth')
         save_checkpoint_to_gcp(f'checkpoint_{epoch}.pth')
 
     # Save the trained model
-    torch.save(net.state_dict(), 'final_model.pth')
+    torch.save(net.state_dict(), f'./checkpoints/final_model.pth')
     save_checkpoint_to_gcp('final_model.pth')
     print('Final model saved')
 
@@ -73,10 +93,8 @@ def test():
     testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2)
 
-    load_checkpoint_from_gcp('final_model.pth')
-
     net = Net()
-    net.load_state_dict(torch.load('./gcp/final_model.pth'))
+    net.load_state_dict(torch.load('./checkpoints/final_model.pth'))
 
     # Test the network on the whole dataset
     correct = 0
@@ -90,7 +108,7 @@ def test():
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
-    print(f'Accuracy of the network on the 10000 test images: {100 * correct / total}%')
+    print(f'Accuracy of the network on the 10,000 test images: {100 * correct / total}%')
 
 if __name__ == '__main__':
     train()

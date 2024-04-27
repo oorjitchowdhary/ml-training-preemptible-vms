@@ -1,5 +1,5 @@
 from google.cloud import storage
-import io
+import os
 
 bucket_name = 'cifar-pytorch-checkpoints'
 storage_client = storage.Client().from_service_account_json('robs-project-382021-29095b54cf4c.json')
@@ -16,7 +16,8 @@ def load_checkpoint_from_gcp(filename):
     bucket = storage_client.bucket(bucket_name)
 
     blob = bucket.blob(filename)
-    blob.download_to_filename(f'./gcp/{filename}')
+    os.makedirs('./checkpoints', exist_ok=True)
+    blob.download_to_filename(f'./checkpoints/{filename}')
 
     print(f'Checkpoint loaded from GCP: {filename}')
 
