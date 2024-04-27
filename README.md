@@ -20,7 +20,9 @@ Through periodic checkpointing of the model in training to a cloud storage bucke
 There is a `skypilot.yaml` file initialized in the repository that contains the configuration for utilizing [SkyPilot](https://skypilot.readthedocs.io/en/latest/examples/spot-jobs.html), a framework for running jobs across clouds. A successful and complete implementation of the workflow would involve using SkyPilot to automatically find available Spot VM resources across multiple cloud providers and restart the job from the last checkpoint in case of a preemption.
 
 ## Getting Started
-To see the workflow in action, follow the installation instructions below:
+1. If you haven't already, [create a Google Cloud Storage bucket](https://cloud.google.com/storage/docs/creating-buckets) and replace the `bucket_name` variable in `checkpointing.py` with the name of your bucket.
+2. [Create a service account](https://cloud.google.com/iam/docs/creating-managing-service-accounts); download the JSON key file and replace the `service_account_json` variable in `checkpointing.py` with the path to the JSON key file.
+3. To see the workflow in action, follow the installation instructions below:
 ```bash
 # Clone the repository
 git clone https://github.com/oorjitchowdhary/cifar-on-spot-vm.git

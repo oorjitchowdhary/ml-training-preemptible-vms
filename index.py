@@ -3,25 +3,8 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 
-from checkpointing import save_checkpoint_to_gcp, load_checkpoint_from_gcp, checkpoint_exists
+from checkpointing import save_checkpoint_to_gcp, resume_from_checkpoint
 from model import Net
-
-def resume_from_checkpoint():
-    # Find the latest checkpoint
-    epoch, latest_checkpoint = 0, None
-    for i in range(9, -1, -1):
-        if checkpoint_exists(f'checkpoint_{i}.pth'):
-            latest_checkpoint = f'checkpoint_{i}.pth'
-            epoch = i
-            break
-    
-    if latest_checkpoint is None:
-        print('No checkpoints found')
-        return 0, None
-    
-    # Load the latest checkpoint
-    load_checkpoint_from_gcp(latest_checkpoint)
-    return epoch + 1, latest_checkpoint
 
 def train():
     # Define image transformations
