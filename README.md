@@ -1,4 +1,4 @@
-![UW eScience Institute](https://www.washington.edu/research/wp-content/uploads/eScience_Logo_HR.png)
+![UW eScience Institute](./assets/logo.jpg)
 
 # ML training on Spot VMs
 This repository represents an ongoing cloud computing effort at the [UW eScience Institute](https://escience.washington.edu) that aims to optimize cloud usage for research computing. The overarching goal is to find the most prevalent cloud use cases for research and approximate a walkthrough alongside a breakdown of the cost analysis and performance metrics for each use case.
