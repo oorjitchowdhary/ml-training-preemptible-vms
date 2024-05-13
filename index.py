@@ -1,9 +1,9 @@
-import os
-import torch
-import torchvision
+import os, sys
+import torch, torchvision
 import torchvision.transforms as transforms
 
 from checkpointing import save_checkpoint_to_gcp, resume_from_checkpoint
+from preemption import is_preempted_on_gcp
 from model import Net
 
 def train():
@@ -94,7 +94,12 @@ def test():
     print(f'Accuracy of the network on the 10,000 test images: {100 * correct / total}%')
 
 if __name__ == '__main__':
-    train()
-    print('Training complete; moving to testing...')
-    test()
-    print('Testing complete; all done!')
+    while not is_preempted_on_gcp():
+        train()
+        print('Training complete; moving to testing...')
+    else:
+        print('Preempted; train() saved latest checkpoint; exiting...')
+        # save_checkpoint_to_gcp('checkpoint.pth')
+        sys.exit(0)
+    # test()
+    # print('Testing complete; all done!')
