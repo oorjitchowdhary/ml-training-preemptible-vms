@@ -94,12 +94,13 @@ def test():
     print(f'Accuracy of the network on the 10,000 test images: {100 * correct / total}%')
 
 if __name__ == '__main__':
-    while not is_preempted_on_gcp():
-        train()
-        print('Training complete; moving to testing...')
-    else:
-        print('Preempted; train() saved latest checkpoint; exiting...')
-        # save_checkpoint_to_gcp('checkpoint.pth')
-        sys.exit(0)
+    while True:
+        if not is_preempted_on_gcp(): 
+            train()
+            print('Training complete; moving to testing...')
+        else:
+            print('Preempted; train() saved latest checkpoint; exiting...')
+            # save_checkpoint_to_gcp('checkpoint.pth')
+            sys.exit(0)
     # test()
     # print('Testing complete; all done!')
