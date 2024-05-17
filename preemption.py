@@ -12,3 +12,12 @@ def is_preempted_on_gcp():
         print(f'Error detecting preemption: {e}')
 
     return False
+
+def is_simulated_preemption():
+    try:
+        with open('./preemption.txt', 'r') as f:
+            return f.read().strip() == 'TRUE'
+    except Exception as e:
+        print(f'Error reading preemption file: {e}')
+    
+    return False

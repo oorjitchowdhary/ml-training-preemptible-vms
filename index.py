@@ -3,7 +3,7 @@ import torch, torchvision
 import torchvision.transforms as transforms
 
 from checkpointing import save_checkpoint_to_gcp, resume_from_checkpoint
-from preemption import is_preempted_on_gcp
+from preemption import is_preempted_on_gcp, is_simulated_preemption
 from model import Net
 
 def train():
@@ -95,7 +95,7 @@ def test():
 
 if __name__ == '__main__':
     while True:
-        if is_preempted_on_gcp():
+        if is_simulated_preemption(): # for testing based on file presence
             print('Preempted; performing graceful shutdown...')
             # save_checkpoint_to_gcp('checkpoint.pth')
             sys.exit(0)
