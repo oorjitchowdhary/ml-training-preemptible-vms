@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, time
 import torch, torchvision
 import torchvision.transforms as transforms
 
@@ -95,12 +95,14 @@ def test():
 
 if __name__ == '__main__':
     while True:
-        if not is_preempted_on_gcp(): 
-            train()
-            print('Training complete; moving to testing...')
-        else:
-            print('Preempted; train() saved latest checkpoint; exiting...')
+        if is_preempted_on_gcp():
+            print('Preempted; performing graceful shutdown...')
             # save_checkpoint_to_gcp('checkpoint.pth')
             sys.exit(0)
-    # test()
-    # print('Testing complete; all done!')
+        else:
+            train()
+            print('Training complete; moving to testing...')
+            test()
+            print('Testing complete; all done!')
+
+        time.sleep(10)
