@@ -1,5 +1,17 @@
 # Notes by Rob
 
+## ImageNet
+
+- 155GB, 1000 classes of image classification; 75 to 90 epochs
+- Need more than 3 layers of neurons
+- ResNet is a modification of the CNN: 1000 layers all interlinked (MSR 2015 paper: Work on ImageNet)
+    - Deep learning model: 2 variants
+        - Resnet 18: Depth is 18
+        - Resnet 50: Depth is 50: One of the best approaches to ImageNet
+            - PyTorch already has PyTorch.resnet50(usePretrained = True) and go from there
+    - There is also AlexNet and VGG
+- ImageNet is still on probation
+
 ## Plan
 
 * Start a VM on Azure
