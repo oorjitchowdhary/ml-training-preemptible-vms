@@ -2,20 +2,23 @@ resources:
   # Optional; if left out, automatically pick the cheapest cloud.
   cloud: gcp
   region: us-west1
-  zone: us-west1-b
+  use_spot: true
 
 # Working directory (optional) containing the project codebase.
 # Its contents are synced to ~/sky_workdir/ on the cluster.
-workdir: .
+# workdir: .
 
-# file_mounts:
-#   /checkpoint:
-#     source: gs://cifar-skypilot-bucket
-#     mode: MOUNT
+file_mounts:
+  /checkpoints:
+    name: skypilot-pytorch-checkpoints
+    store: gcs
+    mode: MOUNT
 
 # Typical use: pip install -r requirements.txt
 # Invoked under the workdir (i.e., can use its files).
 setup: |
+  sudo apt-get update
+  ls --all
   echo "Running SkyPilot setup script."
   pip install -r requirements.txt
   echo "Finished SkyPilot setup script."

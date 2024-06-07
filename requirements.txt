@@ -2,3 +2,4 @@ torch
 torchvision
 google-cloud-storage
 numpy
+scipy

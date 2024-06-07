@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torchvision.models as models
 
 class Net(nn.Module):
     def __init__(self):
@@ -20,3 +21,9 @@ class Net(nn.Module):
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
+
+
+resnet50 = models.resnet50(pretrained=True)
+resnet50.fc = nn.Linear(resnet50.fc.in_features, 1000)
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+resnet50.to(device)
