@@ -1,23 +1,27 @@
-import requests
+import requests, time
 
-def is_preempted_on_gcp():
-    METADATA_URL = 'http://metadata.google.internal/computeMetadata/v1/instance/preempted'
-    METADATA_HEADERS = {'Metadata-Flavor': 'Google'}
 
-    try:
-        response = requests.get(METADATA_URL, headers=METADATA_HEADERS)
-        if response.status_code == 200:
-            return response.text.strip() == 'TRUE'
-    except Exception as e:
-        print(f'Error detecting preemption: {e}')
+def check_gcp_preemption(preemption_event):
+    while not preemption_event.is_set():
+        try:
+            url = 'http://metadata.google.internal/computeMetadata/v1/instance/preempted'
+            headers = {'Metadata-Flavor': 'Google'}
 
-    return False
+            response = requests.get(url, headers=headers)
+            if response.status_code == 200:
+                preempted = response.text
 
-def is_simulated_preemption():
-    try:
-        with open('./preemption.txt', 'r') as f:
-            return f.read().strip() == 'TRUE'
-    except Exception as e:
-        print(f'Error reading preemption file: {e}')
-    
-    return False
+                if preempted == 'TRUE':
+                    print('Preempted on GCP')
+                    preemption_event.set()
+                    return
+                else:
+                    print('Not preempted on GCP')
+
+            else:
+                print('Failed to check GCP preemption with HTTP status code:', response.status_code)
+
+        except Exception as e:
+            print(e)
+
+        time.sleep(1)
