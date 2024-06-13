@@ -59,6 +59,13 @@ python3 -m index.py
 
 Accuracy around 63% after 10 epochs.
 
+## Today 13-JUN-2024 Items
+
+- Checkpointing
+- Preemption-proof execution
+    - Test via "Host Maintenance Event" which we can trigger on a GCP Spot instance
+- CIFAR-10 on "any" cloud (using Google)
+
 
 | Instance        | Rate | Sec  |  Cost | Epochs | Learning Rate | Momentum
 | ------------- |:-------------:| -----:| -----:| -----:| -----:| -----:|
