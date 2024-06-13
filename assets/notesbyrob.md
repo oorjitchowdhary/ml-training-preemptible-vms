@@ -59,13 +59,101 @@ python3 -m index.py
 
 Accuracy around 63% after 10 epochs.
 
+
 ## Today 13-JUN-2024 Items
 
 - Checkpointing
 - Preemption-proof execution
     - Test via "Host Maintenance Event" which we can trigger on a GCP Spot instance
+    - This is initiated using the `gcloud` cli: See the `README.md`
 - CIFAR-10 on "any" cloud (using Google)
+- The `index.py` file in ~ works with `~/utils/preemption.py` to do a 5 second polling loop
+    - Two threads: One does the work, the other checks for premption
+    - Does the work: Training thread: CIFAR-train: See `~/models/cifar.py`
+ 
+### From Scratch CIFAR on GCP SPOT
 
+This is redundant to `~/README.md`.
+
+* Start a SPOT VM on GCP, log in to the command line
+* `git clone https://github.com/oorjitchowdhary/ml-training-preemptible-vms.git`
+* Create a Google Cloud Storage bucket
+    * Can do using console
+    * `gcloud storage buckets create gs://BUCKET_NAME --location==BUCKET_LOCATION`
+* Establish a service account for use by the Python program
+    * Created by default per GCP Project: Dashboard shows this: Login > Project > IAM and Admin
+* Make service account usable via service account JSON: Download through this same IAM interface
+    * Left menu: Service Accounts > hyperlink `developer.gserviceaccount` etc > Top menu KEYS >
+        * Add new Key > JSON > Download this JSON file to local computer
+        * `scp` this file to the SPOT instance to `~` where `index.py` resides
+        * Yes: At any moment this SPOT could evaporate
+        * Incidentally filename will be `<project name>-<numbers>.json`
+* Align json creds with the code base
+    * go to `~/utils/checkpointing.py` and modify lines 4 and 5
+    * `service_account` and `bucket_name` adjusted to match the above steps
+* Activate the environment, run the program
+
+
+```
+sudo apt update
+cd ml-training-preemptible-vms
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python3 index.py
+```
+
+* Intermediate checkpoint process
+    * `index.py` writes to `~/checkpoints/` like `checkpoint_<epoch>.pth` (pytorch file extension)
+        * `torch.save(<directory>)`
+        * Then the python file copies this to the bucket 
+* Timing comparisons
+    * First time run of CIFAR will require extra time to download the data; so re-run that
+    * Use the Linux `time` utility or Python `time` library to get a runtime
+    * Record the results!
+    * Stop, re-size, start the VM: Another instance type
+* Earlier version of `pip install -r requirements.txt` ran into resolution problems
+    * For five packages I deleted versions, as in `==1.2.1`
+    * This should not be necessary now
+* Re-run:
+    * Can first blow away the checkpoint results from earlier runs first.
+    * Can first blow away CIFAR source data
+    * Check print diagnostics, match to source code: Consistent?
+* Automatic deployment: Via VM Image or Container: To Do list
+* Sky Pilot pivot
+    * Currently we do not use any Sky Pilot functionality
+    * SPOT recovery / failover: We wish to continue...
+        - SkyPilot needs access to our checkpointing bucket via YAML file
+    - Sky Pilot can maintain a cluster
+    - Activation of Sky Pilot
+        - install `sky` on my laptop
+        - clone the cifar repo on my laptop
+        - As above: Create the bucket on GCP (although this can also be automated) 
+        - add `skypilot.yml` to the repo
+            - There actually is one present but it is in "example" mode only
+        - `sky launch -c myclustername myymlfilename.yml`
+            - usual credentials step
+            - then Sky Pilot finds a cheap VM; asks for confirmation on spend etcetera
+            - then Sky Pilot creates a checkpoint bucket if none found
+            - then Sky Pilot goes on to setup to eventually execute `python3 -m index.py`
+            - then Sky Pilot will do a polling loop for preemption
+                - So this is happening in parallel to the preemption thread on the SPOT VM
+    * During execution Sky Pilot will check `~/checkpoints` for new files: Copy to bucket
+        * `torch.save()` creates this file; SkyPilot copies that to the bucket; another polling loop
+        * So we now have two redundancies: checkpoint copy to bucket and thread checking for preemption
+        * See the sky pilot yaml file reference documentation
+
+## Install and use `gcloud` to simulate a preemption
+
+- Simplest? is to do this on my laptop
+- Authenticate `gcloud` by installing it and running it: First time it walks me through authentication
+- This involves 'open your browser and authenticate'
+- The result is some credentials hidden in a `.gcp` (or something like that) folder in my root folder
+- The `gcloud` command to preempt the SPOT instance is in `README.md`
+
+
+
+## Legacy table
 
 | Instance        | Rate | Sec  |  Cost | Epochs | Learning Rate | Momentum
 | ------------- |:-------------:| -----:| -----:| -----:| -----:| -----:|
