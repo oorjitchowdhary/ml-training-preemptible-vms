@@ -2,15 +2,21 @@
 
 ## ImageNet
 
-- 155GB, 1000 classes of image classification; 75 to 90 epochs
+- 155GB, 1000 image classifications; 1.2M images, 75 to 90 epochs
+- Data is on kaggle: Would need to join, download, upload to S3
+    - Is there another path to this data? Unknown
 - Need more than 3 layers of neurons
-- ResNet is a modification of the CNN: 1000 layers all interlinked (MSR 2015 paper: Work on ImageNet)
+- ResNet is a modification of the CNN: 50 layers all interlinked (MSR 2015 paper)
     - Deep learning model: 2 variants
-        - Resnet 18: Depth is 18
-        - Resnet 50: Depth is 50: One of the best approaches to ImageNet
+        - Resnet 18: Depth is 18 layers
+        - Resnet 50: Depth is 50: One of best approaches to ImageNet
             - PyTorch already has PyTorch.resnet50(usePretrained = True) and go from there
-    - There is also AlexNet and VGG
-- ImageNet is still on probation
+    - There is also AlexNet and VGG not considered here
+- ImageNet: The right thing to use?
+    - SkyPilot's discovered S3 bucket of ImageNet data is list-only (no read)
+    - Other datasets that will require a GPU: Open question at this point (June 2024)
+        - Perhaps CIFAR-100 (more images)
+        - Perhaps MNIST (handwritten digits: 28 x 28 60k images)
 
 ## Plan
 
@@ -44,7 +50,7 @@ Here is the old command sequence:
 
 ```
 sudo apt update
-cd cifar-on-spot-vm/
+cd ml-training-preemptible-vms/
 python3 -m venv .venv
 source .venv/bin/activate
 python3 -m pip install -r requirements.txt
