@@ -27,9 +27,8 @@ Through periodic checkpointing of the model in training to an external cloud sto
 
 ## Workflow
 ### Training
-
 **CIFAR-10:**
-1. Load and normalize CIFAR-10 using `torchvision`. (The output of `torchvision` datasets are of type `PILImage` images of range [0, 1]. We transform them to Tensors of normalized range [-1, 1].)
+1. Load and normalize CIFAR-10 using `torchvision`.
 2. Define the 3 layer CNN model.
 3. Define the loss function and optimizer.
 4. Loop over the dataset `n` times, feeding inputs to the model and optimizing the weights.
@@ -48,9 +47,8 @@ Relevant tutorial: [ImageNet training in PyTorch](https://github.com/pytorch/exa
 1. Periodically save (at the end of each epoch) the model's state dictionary to a `.pth` file in `/checkpoints`.
 2. Upload the `.pth` file to a cloud storage bucket.
 
-
 **Cloud Storage bucket:**<br>
-A Google Cloud Storage bucket is used to store the `.pth` files of the model. The bucket is created using the `google-cloud-storage` Python package. Setting up such a bucket involves creating or using the default service account, downloading the JSON key file, and setting the `service_account_json` variable in `checkpointing.py` to the path of the JSON key file. Make sure to also replace the `bucket_name` variable with the name of your bucket.
+A Google Cloud Storage bucket is used to store the `.pth` files of the model. Setting up such a bucket involves creating or using the default service account, downloading the JSON key file, and setting the `service_account_json` variable in `checkpointing.py` to the path of the JSON key file. Make sure to also replace the `bucket_name` variable with the name of your bucket.
 
 Note: You can use any cloud storage service to store the model checkpoints as long as you modify the `checkpointing.py` script accordingly.
 
@@ -81,8 +79,8 @@ TODO: Notes about task.yaml and auto-failover.
 3. To see the workflow in action, follow the installation instructions below:
 ```bash
 # Clone the repository
-git clone https://github.com/oorjitchowdhary/cifar-on-spot-vm.git
-cd cifar-on-spot-vm
+git clone https://github.com/oorjitchowdhary/ml-training-preemptible-vms.git
+cd ml-training-preemptible-vms
 
 # Create a virtual environment
 python3 -m venv venv
