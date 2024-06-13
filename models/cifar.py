@@ -3,7 +3,7 @@ import torchvision.transforms as transforms
 import torch.nn as nn
 import torch.nn.functional as F
 
-from utils.checkpointing import save_checkpoint_to_gcp
+from utils.checkpointing import save_checkpoint_to_gcp, resume_from_checkpoint
 
 # Define the CNN model for CIFAR-10 dataset
 class CifarNet(nn.Module):
@@ -27,65 +27,69 @@ class CifarNet(nn.Module):
 
 
 # Train the CNN model on CIFAR-10 dataset
-def train():
-    # Define image transformations
-    transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+def train(preemption_event):
+    while not preemption_event.is_set():
+        # Define image transformations
+        transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-    # Number of images to load per batch
-    batch_size = 4
+        # Number of images to load per batch
+        batch_size = 4
 
-    # Load CIFAR-10 dataset
-    trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
+        # Load CIFAR-10 dataset
+        trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
+        trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
 
-    # Classes in CIFAR-10 dataset for reference
-    classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+        # Classes in CIFAR-10 dataset for reference
+        classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
-    # Get CNN model and define loss function and optimizer
-    net = CifarNet()
+        # Get CNN model and define loss function and optimizer
+        net = CifarNet()
 
-    import torch.optim as optim
-    import torch.nn as nn
+        import torch.optim as optim
+        import torch.nn as nn
 
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+        criterion = nn.CrossEntropyLoss()
+        optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
-    # Train the network
-    # start_epoch, latest_checkpoint = resume_from_checkpoint()
-    start_epoch = 0
-    for epoch in range(start_epoch, 10):
-        running_loss = 0.0
-        for i, data in enumerate(trainloader, 0):
-            inputs, labels = data
+        # Train the network
+        start_epoch, latest_checkpoint = resume_from_checkpoint()
+        for epoch in range(start_epoch, 10):
+            running_loss = 0.0
+            for i, data in enumerate(trainloader, 0):
+                inputs, labels = data
 
-            optimizer.zero_grad()
+                optimizer.zero_grad()
 
-            outputs = net(inputs)
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
+                outputs = net(inputs)
+                loss = criterion(outputs, labels)
+                loss.backward()
+                optimizer.step()
 
-            checkpoint = {
-                'epoch': epoch,
-                'model_state_dict': net.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
-                'loss': loss
-            }
+                checkpoint = {
+                    'epoch': epoch,
+                    'model_state_dict': net.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'loss': loss
+                }
 
-            running_loss += loss.item()
-            if i % 2000 == 1999:
-                print(f'[{epoch}, {i + 1}] loss: {running_loss / 2000}')
-                running_loss = 0.0
+                running_loss += loss.item()
+                if i % 2000 == 1999:
+                    print(f'[{epoch}, {i + 1}] loss: {running_loss / 2000}')
+                    running_loss = 0.0
 
-        # Save the checkpoint at the end of each epoch
-        os.makedirs('./checkpoints', exist_ok=True)
-        torch.save(checkpoint, f'./checkpoints/checkpoint_{epoch}.pth')
-        save_checkpoint_to_gcp(f'checkpoint_{epoch}.pth')
+            # Save the checkpoint at the end of each epoch
+            os.makedirs('./checkpoints', exist_ok=True)
+            torch.save(checkpoint, f'./checkpoints/checkpoint_{epoch}.pth')
+            save_checkpoint_to_gcp(f'checkpoint_{epoch}.pth')
 
-    # Save the trained model
-    torch.save(net.state_dict(), f'./checkpoints/final_model.pth')
-    save_checkpoint_to_gcp('final_model.pth')
-    print('Final model saved')
+        # Save the trained model
+        torch.save(net.state_dict(), f'./checkpoints/final_model.pth')
+        save_checkpoint_to_gcp('final_model.pth')
+        print('Final model saved')
+
+    else:
+        print('Training stopped due to preemption')
+        print('Placeholder for any further checkpointing or cleanup code')
 
 
 # Test the CNN model on CIFAR-10 dataset

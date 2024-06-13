@@ -10,7 +10,7 @@ if __name__ == '__main__':
     preemption_event = threading.Event()
 
     preemption_thread = threading.Thread(target=check_gcp_preemption, args=(preemption_event,))
-    training_thread = threading.Thread(target=cifar_train)
+    training_thread = threading.Thread(target=cifar_train, args=(preemption_event,))
 
     preemption_thread.start()
     training_thread.start()

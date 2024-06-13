@@ -24,4 +24,4 @@ def check_gcp_preemption(preemption_event):
         except Exception as e:
             print(e)
 
-        time.sleep(1)
+        time.sleep(5)
