@@ -1,5 +1,15 @@
 # Notes by Rob
 
+- Notes from discussion with Oorjit 18-DEC-2024
+    - Three tasks
+        - CIFAR-10 is full-blown training, runs 5 minutes, CNN, image classification
+        - ImageNet/ResNet: fine-tuning (not full), run time 10 minutes, image classification
+            - Basic parameters and timing needed
+        - bert sentiment analysis
+            - text: fine-tuning, 4 classes, runs in like 5 minutes
+
+
+
 ## ImageNet
 
 - 155GB, 1000 image classifications; 1.2M images, 75 to 90 epochs
