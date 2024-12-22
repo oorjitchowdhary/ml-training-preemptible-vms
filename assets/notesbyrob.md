@@ -7,6 +7,13 @@
             - Basic parameters and timing needed
         - bert sentiment analysis
             - text: fine-tuning, 4 classes, runs in like 5 minutes
+    - Two kinds of checkpointing: The hard way and the easy way...
+        - Easy way is write a x-kb file upon trigger: works on cifar10 on Google cloud object storage
+            - Can simulate the interrupt
+            - Don't care so much about alert
+        - Hard way is to convert the VM to an image in 30 second
+            - Get alert (notification trigger: your machine is about to die): Issue the bundler
+            - need a dmtcp (see Hyak) on GCP (or some other cloud)
 
 
 
