@@ -1,5 +1,23 @@
 # Notes by Rob
 
+- Notes from 14-JAN-2025
+    - Using Docker is the best way
+    - Snapshot the Spot instance? No no no.
+    - Create the Docker image in advance on two clouds...
+    - Our program looks in the GCP bucket for a checkpoint (CIFAR has 10 iterations)
+        - Resumes training based on which checkpoint it found
+        - So here is the plan
+            - Create an Ubuntu Docker image with Python installed, repo loaded, CIFAR dataset
+            - Runs, writes first epoch...
+            - GCP instance gets evaporated after this...
+                - How does this happen?
+                    - Periodic polling: Every 5 seconds must be running on the Pre-VM
+                    - Polling code exists already
+                    - Docker needs to mount the "manual halt" resource
+                    - Demo: touch `preempt.txt`
+                    - Now who starts the image on AWS?
+            - Start the same same Docker imagine on AWS
+                - which is already configured to look at the GCP Bucket; picks up where we left off
 - Notes from discussion with Oorjit 18-DEC-2024
     - Three tasks
         - CIFAR-10 is full-blown training, runs 5 minutes, CNN, image classification
