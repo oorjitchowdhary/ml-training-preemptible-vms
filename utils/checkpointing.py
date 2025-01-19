@@ -1,9 +1,12 @@
 from google.cloud import storage
 import os
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
 service_account_json = 'robs-project-382021-29095b54cf4c.json' # Replace with your own service account json
+service_account_json_path = os.path.join(dir_path, '../', service_account_json)
+
 bucket_name = 'cifar-pytorch-checkpoints' # Replace with your own bucket name
-storage_client = storage.Client().from_service_account_json(service_account_json)
+storage_client = storage.Client().from_service_account_json(service_account_json_path)
 
 def save_checkpoint_to_gcp(filename):
     bucket = storage_client.bucket(bucket_name)

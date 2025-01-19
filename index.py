@@ -1,5 +1,6 @@
 import argparse
 import threading
+import os
 
 from utils.preemption import check_gcp_preemption, check_simulated_preemption
 from models.cifar import train as cifar_train, test as cifar_test
