@@ -54,8 +54,16 @@ def train(preemption_event):
         # Train the network
         start_epoch, latest_checkpoint = resume_from_checkpoint()
         for epoch in range(start_epoch, 10):
+            if preemption_event.is_set():
+                print('Training at epoch', epoch, 'stopped due to preemption')
+                break
+
             running_loss = 0.0
             for i, data in enumerate(trainloader, 0):
+                if preemption_event.is_set():
+                    print('Training loop stopped due to preemption')
+                    break
+
                 inputs, labels = data
 
                 optimizer.zero_grad()
@@ -78,18 +86,10 @@ def train(preemption_event):
                     running_loss = 0.0
 
             # Save the checkpoint at the end of each epoch
-            os.makedirs('./checkpoints', exist_ok=True)
-            torch.save(checkpoint, f'./checkpoints/checkpoint_{epoch}.pth')
-            save_checkpoint_to_gcp(f'checkpoint_{epoch}.pth')
-
-        # Save the trained model
-        torch.save(net.state_dict(), f'./checkpoints/final_model.pth')
-        save_checkpoint_to_gcp('final_model.pth')
-        print('Final model saved')
-
-    else:
-        print('Training stopped due to preemption')
-        print('Placeholder for any further checkpointing or cleanup code')
+            if not preemption_event.is_set():
+                os.makedirs('./checkpoints', exist_ok=True)
+                torch.save(checkpoint, f'./checkpoints/checkpoint_{epoch}.pth')
+                save_checkpoint_to_gcp(f'checkpoint_{epoch}.pth')
 
 
 # Test the CNN model on CIFAR-10 dataset
