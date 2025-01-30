@@ -12,6 +12,8 @@
             - The Function App API builder requires installing some stuff on an Azure VM
                 - The instructions are out of date; Issue raised for Naomi
                 - The new procedure is [at this link](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt) (simpler)
+                - This replaces everything between **New Terminal** and **Finally**
+                    - ...so there is a two line copy paste install for Azure functions core tools...
     - Command line `python -m index.py` with the idea of running CIFAR-10
         - Blocked: GCP credential error
 - GCP procedural goes here
