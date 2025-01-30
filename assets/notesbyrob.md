@@ -1,4 +1,15 @@
-# Notes by Rob
+# Notes
+
+
+- Azure procedural goes here
+    - Done: Start up an Azure VM, `ssh` there, configure it, clone this repo, create and start a `testenv` environment
+        - Note that for Ubuntu the default user is `azureuser`
+        - Note that `ssh` connection can be done via VSCode
+        - Aside: [Here is the serverless function app tutorial for 544](https://github.com/cloudbank-project/az-serverless-tutorial/blob/main/content/functions/_index.md)
+    - Command line `python -m index.py` with the idea of running CIFAR-10
+        - Blocked: GCP credential error
+- GCP procedural goes here
+- AWS procedural goes here
 
 - Notes from 14-JAN-2025
     - Using Docker is the best way
