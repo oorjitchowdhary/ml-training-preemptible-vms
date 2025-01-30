@@ -5,7 +5,13 @@
     - Done: Start up an Azure VM, `ssh` there, configure it, clone this repo, create and start a `testenv` environment
         - Note that for Ubuntu the default user is `azureuser`
         - Note that `ssh` connection can be done via VSCode
-        - Aside: [Here is the serverless function app tutorial for 544](https://github.com/cloudbank-project/az-serverless-tutorial/blob/main/content/functions/_index.md) and [here is the published version](https://cloudbank-project.github.io/az-serverless-tutorial/)
+        - Asides on 544
+            - [Here is the serverless function app tutorial for 544](https://github.com/cloudbank-project/az-serverless-tutorial/blob/main/content/functions/_index.md) 
+            - [Here is the published version of the tutorial](https://cloudbank-project.github.io/az-serverless-tutorial/)
+            - The Azure Cosmos DB containing the periodic table: `rob5-cosmosdb`
+            - The Function App API builder requires installing some stuff on an Azure VM
+                - The instructions are out of date; Issue raised for Naomi
+                - The new procedure is [at this link](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt) (simpler)
     - Command line `python -m index.py` with the idea of running CIFAR-10
         - Blocked: GCP credential error
 - GCP procedural goes here
