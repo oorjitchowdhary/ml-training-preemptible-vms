@@ -10,19 +10,22 @@
             - [Here is the published version of the tutorial](https://cloudbank-project.github.io/az-serverless-tutorial/)
             - The Azure Cosmos DB containing the periodic table: `rob5-cosmosdb`
             - The Function App API builder requires installing some stuff on an Azure VM
-                - The instructions are out of date; Issue raised for Naomi
+                - The cli installation instructions are out of date; Issue raised for Naomi to update
                 - The new procedure is [at this link](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt) (simpler)
-                - This replaces everything between **New Terminal** and **Finally**
+                    - This replaces everything between **New Terminal** and **Finally**
                     - ...so there is a two line copy paste install for Azure functions core tools...
     - Command line `python -m index.py` with the idea of running CIFAR-10
         - Blocked: GCP credential error
 - GCP procedural goes here
 - AWS procedural goes here
 
-- Notes from 14-JAN-2025
-    - Using Docker is the best way
-    - Snapshot the Spot instance? No no no.
-    - Create the Docker image in advance on two clouds...
+- Objectives
+    - CIFAR-10 without and with Docker
+        - without
+            - `python -m index.py` runs on 3 clouds
+        - with
+            - using DockerHub; using container registries endemic to the clouds
+    - Understand/document an instance image approach
     - Our program looks in the GCP bucket for a checkpoint (CIFAR has 10 iterations)
         - Resumes training based on which checkpoint it found
         - So here is the plan
