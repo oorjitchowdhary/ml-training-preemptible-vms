@@ -1,12 +1,35 @@
 # Notes
 
-
+- On visual interpretation by LVM/LLM systems
+    - VLM Vision Language Model
+        - Chat GPT uses GPT4V
+    -     Two architectures: First way: Vision encoder: If you do not have a VLM
+            - Takes the entire image; chunks it; converts the results into an embedding vector in the LM; tokenization
+            - This is done by an encoder
+            - Works out of the box to image > text > tokens
+        - Second way: VLM: Model is trained on text and images; pairwise; captions or paragraph
+            - y = -x?
+            - Training phase: From huge datasets
+            - Generalized, better performance; so in common use now
+            - RK described the outsourcing of annotation at AI2
+            - Case study by Anthropic on using MechTurk for this: Safer response differentiation
+        - VLMs suffer the Resolution Curse e.g. a chart in a paper with a lot of detail fails
+            - Active research
+            - Closed box for GPT
+            - Llava (probably out of Llama 3.2 Vision: 1120 x 1120)
+            - Process entire image at once; so fine details are lost
+        - GPT 4 Vision (in 2023) balked at medical applicability
+        - https://openai.com/index/gpt-4v-system-card/
+        - Hallucinations
+        - Mistral OCR (past month) 94.8% to markdown (math); but scanned better... 98.9%
+            - API / tokenization or self-host
+            - Mistral is the company with an LLM Le Chat
 - Azure procedural goes here
     - Done: Start up an Azure VM, `ssh` there, configure it, clone this repo, create and start a `testenv` environment
         - Note that for Ubuntu the default user is `azureuser`
         - Note that `ssh` connection can be done via VSCode
         - Asides on 544
-            - [Here is the serverless function app tutorial for 544](https://github.com/cloudbank-project/az-serverless-tutorial/blob/main/content/functions/_index.md) 
+            - [serverless function app tutorial for 544](https://github.com/cloudbank-project/az-serverless-tutorial/blob/main/content/functions/_index.md) 
             - [Here is the published version of the tutorial](https://cloudbank-project.github.io/az-serverless-tutorial/)
             - The Azure Cosmos DB containing the periodic table: `rob5-cosmosdb`
             - The Function App API builder requires installing some stuff on an Azure VM
