@@ -33,81 +33,80 @@ checkpoint_lock = threading.Lock()
 
 # Train the CNN model on CIFAR-10 dataset
 def train(preemption_event):
-    while not preemption_event.is_set():
-        # Define image transformations
-        transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+    # Define image transformations
+    transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-        # Number of images to load per batch
-        batch_size = 4
+    # Number of images to load per batch
+    batch_size = 4
 
-        # Load CIFAR-10 dataset
-        trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
-        trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
+    # Load CIFAR-10 dataset
+    trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
 
-        # Classes in CIFAR-10 dataset for reference
-        classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+    # Classes in CIFAR-10 dataset for reference
+    classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
-        # Get CNN model and define loss function and optimizer
-        net = CifarNet()
+    # Get CNN model and define loss function and optimizer
+    net = CifarNet()
 
-        import torch.optim as optim
-        import torch.nn as nn
+    import torch.optim as optim
+    import torch.nn as nn
 
-        criterion = nn.CrossEntropyLoss()
-        optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
-        # Train the network
-        start_epoch, latest_checkpoint = resume_from_checkpoint()
-        if start_epoch >= 9:
-            logging.info('TRAIN: Training already completed for all epochs.')
-            return
+    # Train the network
+    start_epoch, latest_checkpoint = resume_from_checkpoint()
+    if start_epoch >= 10:
+        logging.info('TRAIN: Training already completed for all epochs.')
+        return
 
-        if latest_checkpoint:
-            checkpoint_data = torch.load(f'./checkpoints/{latest_checkpoint}')
-            net.load_state_dict(checkpoint_data['model_state_dict'])
-            optimizer.load_state_dict(checkpoint_data['optimizer_state_dict'])
-            logging.info(f'TRAIN: Resuming training from epoch {checkpoint_data["epoch"] + 1}')
+    if latest_checkpoint:
+        checkpoint_data = torch.load(f'./checkpoints/{latest_checkpoint}')
+        net.load_state_dict(checkpoint_data['model_state_dict'])
+        optimizer.load_state_dict(checkpoint_data['optimizer_state_dict'])
+        logging.info(f'TRAIN: Resuming training from epoch {checkpoint_data["epoch"] + 1}')
 
-        for epoch in range(start_epoch, 10):
+    for epoch in range(start_epoch, 10):
+        if preemption_event.is_set():
+            logging.info(f"TRAIN: Training loop stopped due to preemption at epoch {epoch}")
+            break
+
+        running_loss = 0.0
+        for i, data in enumerate(trainloader, 0):
             if preemption_event.is_set():
-                logging.info(f"TRAIN: Training loop stopped due to preemption at epoch {epoch}")
+                logging.info(f"TRAIN: Training loop stopped due to preemption at epoch {epoch}, batch {i}")
                 break
 
-            running_loss = 0.0
-            for i, data in enumerate(trainloader, 0):
-                if preemption_event.is_set():
-                    logging.info(f"TRAIN: Training loop stopped due to preemption at epoch {epoch}, batch {i}")
-                    break
+            inputs, labels = data
 
-                inputs, labels = data
+            optimizer.zero_grad()
 
-                optimizer.zero_grad()
+            outputs = net(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
 
-                outputs = net(inputs)
-                loss = criterion(outputs, labels)
-                loss.backward()
-                optimizer.step()
+            checkpoint = {
+                'epoch': epoch,
+                'model_state_dict': net.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': loss
+            }
 
-                checkpoint = {
-                    'epoch': epoch,
-                    'model_state_dict': net.state_dict(),
-                    'optimizer_state_dict': optimizer.state_dict(),
-                    'loss': loss
-                }
+            running_loss += loss.item()
+            if i % 2000 == 1999:
+                logging.info(f'TRAIN: Epoch {epoch + 1}, Batch {i + 1}, Loss: {running_loss / 2000:.3f}')
+                running_loss = 0.0
 
-                running_loss += loss.item()
-                if i % 2000 == 1999:
-                    logging.info(f'TRAIN: Epoch {epoch + 1}, Batch {i + 1}, Loss: {running_loss / 2000:.3f}')
-                    running_loss = 0.0
-
-            # Save the checkpoint at the end of each epoch
-            if not preemption_event.is_set():
-                with checkpoint_lock:
-                    if not preemption_event.is_set():
-                        os.makedirs('./checkpoints', exist_ok=True)
-                        torch.save(checkpoint, f'./checkpoints/checkpoint_{epoch}.pth')
-                        save_checkpoint_to_gcp(f'checkpoint_{epoch}.pth')
-                        logging.info(f'TRAIN: Checkpoint saved for epoch {epoch + 1}')
+        # Save the checkpoint at the end of each epoch
+        if not preemption_event.is_set():
+            with checkpoint_lock:
+                if not preemption_event.is_set():
+                    os.makedirs('./checkpoints', exist_ok=True)
+                    torch.save(checkpoint, f'./checkpoints/checkpoint_{epoch}.pth')
+                    save_checkpoint_to_gcp(f'checkpoint_{epoch}.pth')
+                    logging.info(f'TRAIN: Checkpoint saved for epoch {epoch + 1}')
 
 
 # Test the CNN model on CIFAR-10 dataset
