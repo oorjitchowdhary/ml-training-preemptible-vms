@@ -1,4 +1,4 @@
-import torch
+import torch, logging
 from torch.utils.data import DataLoader
 from datasets import load_dataset
 from transformers import BertTokenizer, BertForSequenceClassification, AdamW
@@ -25,7 +25,7 @@ def train():
     optimizer = torch.optim.AdamW(bert_model.parameters(), lr=5e-5)
     loss_fn = torch.nn.CrossEntropyLoss() # redundant as BERT model already comes with a loss function
 
-    print('Training BERT model...')
+    logging.info('TRAIN: Starting training for BERT model on AG News dataset')
     # Training loop
     for epoch in range(3):
         bert_model.train()
@@ -44,7 +44,7 @@ def train():
             loss.backward()
             optimizer.step()
 
-        print(f'Epoch {epoch+1}/3 completed with loss: {loss.item():.4f}')
+        logging.info(f'TRAIN: Epoch {epoch + 1}/{3}, Loss: {loss.item():.4f}')
 
     # Save the trained model
     bert_model.save_pretrained('./outputs/bert_model')
@@ -76,4 +76,4 @@ def test():
             true_labels.extend(labels.cpu().numpy())
 
     accuracy = accuracy_score(true_labels, predictions)
-    print(f'Accuracy: {accuracy:.4f}')
+    logging.info(f'TRAIN: Test Accuracy: {accuracy:.4f}')

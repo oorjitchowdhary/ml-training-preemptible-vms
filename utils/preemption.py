@@ -1,5 +1,5 @@
 import requests, time, os
-
+import logging
 
 def check_gcp_preemption(preemption_event):
     while not preemption_event.is_set():
@@ -12,17 +12,17 @@ def check_gcp_preemption(preemption_event):
                 preempted = response.text
 
                 if preempted == 'TRUE':
-                    print('Preempted on GCP')
+                    logging.info('PREEMPTION: Preempted on GCP')
                     preemption_event.set()
                     return
                 else:
-                    print('Not preempted on GCP')
+                    logging.info('PREEMPTION: Not preempted on GCP')
 
             else:
-                print('Failed to check GCP preemption with HTTP status code:', response.status_code)
+                logging.error(f'PREEMPTION: Failed to check preemption status, status code: {response.status_code}')
 
         except Exception as e:
-            print(e)
+            logging.error(f'PREEMPTION: Error checking preemption status: {e}')
 
         time.sleep(5)
 
@@ -31,17 +31,17 @@ def check_simulated_preemption(preemption_event):
     while not preemption_event.is_set():
         try:
             if os.path.exists('/tmp/ml-training-preemptible-vms/preempted.txt'):
-                print('Preemption thread: Preempted on simulated environment')
+                logging.info('PREEMPTION: Preempted on simulated environment')
                 preemption_event.set()
 
                 if preemption_event.is_set():
-                    print('Preemption thread: Preemption event set')
+                    logging.info('PREEMPTION: Preemption event set, stopping training')
                 return
             else:
-                print('Preemption thread: Watching for preemptions')
+                logging.info('PREEMPTION: Not preempted in simulated environment')
 
         except Exception as e:
-            print(e)
+            logging.error(f'PREEMPTION: Error checking preemption status in simulated environment: {e}')
 
         finally:
             time.sleep(1)

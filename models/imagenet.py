@@ -1,4 +1,4 @@
-import torch, torchvision
+import torch, torchvision, logging
 import torchvision.transforms as transforms
 
 # Use pre-trained ResNet-50 model
@@ -42,7 +42,7 @@ def train():
             running_loss += loss.item() * inputs.size(0)
 
         epoch_loss = running_loss / len(train_loader.dataset)
-        print(f'Epoch {epoch}/{90}, Loss: {epoch_loss}')
+        logging.info(f'TRAIN: Epoch {epoch + 1}/{90}, Loss: {epoch_loss:.4f}')
 
         scheduler.step()
 
@@ -78,4 +78,4 @@ def test():
     val_loss /= len(test_loader.dataset)
     accuracy = correct / len(test_loader.dataset)
 
-    print(f'Validation Loss: {val_loss}, Accuracy: {accuracy}')
+    logging.info(f'TRAIN: Test Loss: {val_loss:.4f}, Accuracy: {accuracy:.4f}')

@@ -3,7 +3,7 @@ import torchvision.transforms as transforms
 import torch.nn as nn
 import torch.nn.functional as F
 
-import threading
+import threading, logging
 
 from utils.checkpointing import save_checkpoint_to_gcp, resume_from_checkpoint
 
@@ -59,24 +59,24 @@ def train(preemption_event):
         # Train the network
         start_epoch, latest_checkpoint = resume_from_checkpoint()
         if start_epoch >= 9:
-            print('Training already completed for all epochs')
+            logging.info('TRAIN: Training already completed for all epochs.')
             return
 
         if latest_checkpoint:
             checkpoint_data = torch.load(f'./checkpoints/{latest_checkpoint}')
             net.load_state_dict(checkpoint_data['model_state_dict'])
             optimizer.load_state_dict(checkpoint_data['optimizer_state_dict'])
-            print(f'Resuming from checkpoint: {latest_checkpoint}')
+            logging.info(f'TRAIN: Resuming training from epoch {checkpoint_data["epoch"] + 1}')
 
         for epoch in range(start_epoch, 10):
             if preemption_event.is_set():
-                print('Training at epoch', epoch, 'stopped due to preemption')
+                logging.info(f"TRAIN: Training loop stopped due to preemption at epoch {epoch}")
                 break
 
             running_loss = 0.0
             for i, data in enumerate(trainloader, 0):
                 if preemption_event.is_set():
-                    print('Training loop stopped due to preemption')
+                    logging.info(f"TRAIN: Training loop stopped due to preemption at epoch {epoch}, batch {i}")
                     break
 
                 inputs, labels = data
@@ -97,7 +97,7 @@ def train(preemption_event):
 
                 running_loss += loss.item()
                 if i % 2000 == 1999:
-                    print(f'[{epoch}, {i + 1}] loss: {running_loss / 2000}')
+                    logging.info(f'TRAIN: Epoch {epoch + 1}, Batch {i + 1}, Loss: {running_loss / 2000:.3f}')
                     running_loss = 0.0
 
             # Save the checkpoint at the end of each epoch
@@ -107,7 +107,7 @@ def train(preemption_event):
                         os.makedirs('./checkpoints', exist_ok=True)
                         torch.save(checkpoint, f'./checkpoints/checkpoint_{epoch}.pth')
                         save_checkpoint_to_gcp(f'checkpoint_{epoch}.pth')
-                        print(f'Checkpoint saved for epoch {epoch}')
+                        logging.info(f'TRAIN: Checkpoint saved for epoch {epoch + 1}')
 
 
 # Test the CNN model on CIFAR-10 dataset
@@ -134,4 +134,4 @@ def test():
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
-    print(f'Accuracy of the network on the 10,000 test images: {100 * correct / total}%')
+    logging.info(f'TRAIN: Accuracy of the network on the 10000 test images: {100 * correct / total:.2f}%')

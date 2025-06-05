@@ -1,11 +1,14 @@
 import argparse
 import threading
 import os
+import logging
 
 from utils.preemption import check_gcp_preemption, check_simulated_preemption
 from models.cifar import train as cifar_train, test as cifar_test
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
     preemption_event = threading.Event()
 
     preemption_thread = threading.Thread(target=check_simulated_preemption, args=(preemption_event,))
@@ -18,7 +21,7 @@ if __name__ == '__main__':
     training_thread.join()
 
     if not preemption_event.is_set():
-        print('Training completed successfully')
+        logging.info('Training completed without preemption.')
 
     # parser = argparse.ArgumentParser(description='Premptively checkpoint different ML tasks')
     # parser.add_argument('--datatype', type=str, choices=['text', 'image'], help='Type of the task to perform')
