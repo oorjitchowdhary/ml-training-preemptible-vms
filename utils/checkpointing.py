@@ -46,7 +46,11 @@ def resume_from_checkpoint():
     if latest_checkpoint is None:
         print('No checkpoints found')
         return 0, None
-    
+
+    if epoch >= 9:
+        print('Latest checkpoint is already at the last epoch')
+        return epoch + 1, latest_checkpoint
+
     # Load the latest checkpoint
     load_checkpoint_from_gcp(latest_checkpoint)
     return epoch + 1, latest_checkpoint

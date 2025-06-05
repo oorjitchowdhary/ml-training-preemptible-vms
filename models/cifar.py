@@ -58,6 +58,16 @@ def train(preemption_event):
 
         # Train the network
         start_epoch, latest_checkpoint = resume_from_checkpoint()
+        if start_epoch >= 9:
+            print('Training already completed for all epochs')
+            return
+
+        if latest_checkpoint:
+            checkpoint_data = torch.load(f'./checkpoints/{latest_checkpoint}')
+            net.load_state_dict(checkpoint_data['model_state_dict'])
+            optimizer.load_state_dict(checkpoint_data['optimizer_state_dict'])
+            print(f'Resuming from checkpoint: {latest_checkpoint}')
+
         for epoch in range(start_epoch, 10):
             if preemption_event.is_set():
                 print('Training at epoch', epoch, 'stopped due to preemption')
@@ -72,12 +82,6 @@ def train(preemption_event):
                 inputs, labels = data
 
                 optimizer.zero_grad()
-
-                if latest_checkpoint:
-                    checkpoint_data = torch.load(f'./checkpoints/{latest_checkpoint}')
-                    net.load_state_dict(checkpoint_data['model_state_dict'])
-                    optimizer.load_state_dict(checkpoint_data['optimizer_state_dict'])
-                    print(f'Resuming from checkpoint: {latest_checkpoint}')
 
                 outputs = net(inputs)
                 loss = criterion(outputs, labels)
