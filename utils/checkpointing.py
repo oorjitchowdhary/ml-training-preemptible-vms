@@ -9,12 +9,15 @@ bucket_name = 'cifar-pytorch-checkpoints' # Replace with your own bucket name
 storage_client = storage.Client().from_service_account_json(service_account_json_path)
 
 def save_checkpoint_to_gcp(filename):
-    bucket = storage_client.bucket(bucket_name)
-
-    blob = bucket.blob(filename)
-    blob.upload_from_filename(f'./checkpoints/{filename}')
-
-    print(f'Checkpoint saved to GCP: {filename}')
+    try:
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(filename)
+        blob.upload_from_filename(f'./checkpoints/{filename}')
+        print(f'Checkpoint saved to GCP: {filename}')
+        return True
+    except Exception as e:
+        print(f'Error saving checkpoint to GCP: {e}')
+        return False
 
 def load_checkpoint_from_gcp(filename):
     bucket = storage_client.bucket(bucket_name)

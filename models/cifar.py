@@ -3,6 +3,8 @@ import torchvision.transforms as transforms
 import torch.nn as nn
 import torch.nn.functional as F
 
+import threading
+
 from utils.checkpointing import save_checkpoint_to_gcp, resume_from_checkpoint
 
 # Define the CNN model for CIFAR-10 dataset
@@ -25,6 +27,9 @@ class CifarNet(nn.Module):
         x = self.fc3(x)
         return x
 
+
+# Lock for checkpointing
+checkpoint_lock = threading.Lock()
 
 # Train the CNN model on CIFAR-10 dataset
 def train(preemption_event):
@@ -68,6 +73,12 @@ def train(preemption_event):
 
                 optimizer.zero_grad()
 
+                if latest_checkpoint:
+                    checkpoint_data = torch.load(f'./checkpoints/{latest_checkpoint}')
+                    net.load_state_dict(checkpoint_data['model_state_dict'])
+                    optimizer.load_state_dict(checkpoint_data['optimizer_state_dict'])
+                    print(f'Resuming from checkpoint: {latest_checkpoint}')
+
                 outputs = net(inputs)
                 loss = criterion(outputs, labels)
                 loss.backward()
@@ -87,9 +98,12 @@ def train(preemption_event):
 
             # Save the checkpoint at the end of each epoch
             if not preemption_event.is_set():
-                os.makedirs('./checkpoints', exist_ok=True)
-                torch.save(checkpoint, f'./checkpoints/checkpoint_{epoch}.pth')
-                save_checkpoint_to_gcp(f'checkpoint_{epoch}.pth')
+                with checkpoint_lock:
+                    if not preemption_event.is_set():
+                        os.makedirs('./checkpoints', exist_ok=True)
+                        torch.save(checkpoint, f'./checkpoints/checkpoint_{epoch}.pth')
+                        save_checkpoint_to_gcp(f'checkpoint_{epoch}.pth')
+                        print(f'Checkpoint saved for epoch {epoch}')
 
 
 # Test the CNN model on CIFAR-10 dataset
